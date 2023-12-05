@@ -1,39 +1,25 @@
 import re
 
-def p1():
-    #Use 6 for the test case and 11 for the main case.
-    ENTRIES = 11
-
+def main():
     with open("input") as f:
         cards = f.read().splitlines()
-
+    #PART 1
     total = 0
-    for card in cards:
-        raw = re.findall("[0-9]+", card)
-        nums, win = raw[1:ENTRIES], raw[ENTRIES:]
-        total += int(2 ** (sum(i in win for i in nums) - 1))
-    print(total)
-    
-
-def p2():
-    #Use 6 for the test case and 11 for the main case.
-    ENTRIES = 11
-
-    with open("input") as f:
-        cards = f.read().splitlines()
-
+    #PART 2
     instances = [0] * len(cards)
 
-    for i in range(len(cards)):
-        instances[i] += 1
-
-        raw = re.findall("[0-9]+", cards[i])
-        nums, win = raw[1:ENTRIES], raw[ENTRIES:]
-        wins = sum(i in win for i in nums)
+    for card in range(len(cards)):
+        raw = re.findall("[0-9]+|\|", cards[card])
+        pipe = raw.index("|")
+        wins = sum(i in raw[pipe+1:] for i in raw[1:pipe])
+        #PART 1
+        total += int(2 ** (wins - 1))
+        #PART 2
+        instances[card] += 1
         for j in range(1, wins+1):
-            if i+j < len(instances):
-                instances[i+j] += instances[i]
+            if card+j < len(instances):
+                instances[card+j] += instances[card]
+    print(total)
     print(sum(instances))
-
-p1()
-p2()
+    
+main()
