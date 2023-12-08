@@ -88,23 +88,18 @@ def p2():
     #Regardless of the 5th card, only one pair is possible (ABCDx)  
     elif len(cards) == 4:
       one.append(hand)
-    #This should work?
+    #If the jokers plus any card reach 3, it's a three of a kind, otherwise pair.
     elif len(cards) == 3:
       if any([hand.count(card) + jokers == 3 for card in cards]):
         three.append(hand)
       else:
         two.append(hand)
-
     #With two unique cards, the options are a full house (AABBx) or four of a kind
-    #This is where I'm least certain of the logic, yo.
     elif len(cards) == 2:
-      first = hand.count(list(cards)[0])
-      if first == 1 or first + jokers == 4:
+      if any([hand.count(card) == 1 for card in cards]):
         four.append(hand)
       else:
         full.append(hand)
-
-
     #If only one card appears, it must be 5 of a kind!
     else:
         five.append(hand)
