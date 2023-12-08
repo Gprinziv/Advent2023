@@ -61,6 +61,7 @@ def p1():
   print(total)
 
 def p2():
+  #Performing some simple replacement operations to make the sorting process painless.
   with open("input") as f:
     text = f.read()
     text = re.sub("J", "0", text)
@@ -78,40 +79,43 @@ def p2():
 
   for hand in hands:
     cards = set(hand)
+    jokers = hand.count("0")
+    cards.discard("0")
+
+    #Jokers have been discarded, so this is high card.
     if len(cards) == 5:
-      high.append(hand)
+      high.append(hand)  
+    #Regardless of the 5th card, only one pair is possible (ABCDx)  
+    elif len(cards) == 4:
+      one.append(hand)
+    #This should work?
+    elif len(cards) == 3:
+      if any([hand.count(card) + jokers == 3 for card in cards]):
+        three.append(hand)
+      else:
+        two.append(hand)
+
+    #With two unique cards, the options are a full house (AABBx) or four of a kind
+    #This is where I'm least certain of the logic, yo.
+    elif len(cards) == 2:
+      first = hand.count(list(cards)[0])
+      if first == 1 or first + jokers == 4:
+        four.append(hand)
+      else:
+        full.append(hand)
+
+
+    #If only one card appears, it must be 5 of a kind!
     else:
-      cards.discard("0")
-      if len(cards) == 1: #Five of a kind!
         five.append(hand)
-      elif len(cards) == 4: #We know no jokers, so one pair.
-        one.append(hand)
-      elif len(cards) == 2: #If the count of one of the cards is one, it's a four of a kind. Otherwise it's Full House
-        isFull = True
-        for card in cards:
-          if hand.count(card) == 1:
-            isFull = False
-            four.append(hand)
-            break
-        if isFull:
-          full.append(hand)
-      else: #Two Pair or Three of a Kind. The only valid two pair has no jokers.
-        numOfOnes = sum(hand.count(card) == 1 for card in cards)
-        if numOfOnes == 1:
-          two.append(hand)
-        else:
-          three.append(hand)
 
   ranks = sorted(high) + sorted(one) + sorted(two) + sorted(three)\
       + sorted(full) + sorted(four) + sorted(five)
 
-  print(sorted(five))
-
-
   total = 0
   for i, hand in enumerate(ranks):
     total += (i+1) * bids[hand]
-    #print(f"hand {i}: {hand}")
+    print(f"hand {i+1}: {hand}")
   print(total)
 
 #p1()
