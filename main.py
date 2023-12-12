@@ -1,54 +1,75 @@
-import re
+def findNext(cur, x, y):
+    if cur == "7":
+        return [[x-1, y], [x, y+1]]
+    elif cur == "J":
+        return [[x-1, y], [x, y-1]]
+    elif cur == "F":
+        return [[x+1, y], [x, y+1]]
+    elif cur == "L":
+        return [[x+1, y], [x, y-1]]
+    elif cur == "-":
+        return [[x-1, y], [x+1, y]]
+    elif cur == "|":
+        return [[x, y+1],[x, y-1]]
 
-def p1():
-  with open("input") as f:
-    moves, *paths = f.read().splitlines()
-  paths = [re.findall("[A-Z]+", p) for p in paths]
-  nodes = {}
-  for path in paths[1:]:
-    nodes[path[0]] = path[1:]
-  location = "AAA"
-  steps = 0
-  while location != "ZZZ":
-    for move in moves:
-      if move == "R":
-        location = nodes[location][1]
-      else:
-        location = nodes[location][0]
-      steps += 1
-      if location == "ZZZ": break
-  print(steps)
+with open("test4") as f:
+    pipes = f.read().splitlines()
 
+for i in range(len(pipes)):
+    if "S" in pipes[i]:
+        start = [pipes[i].index('S'), i]
 
+print(start)
+stepmap = [['.'] * len(pipe) for pipe in pipes]
+stepmap[start[1]][start[0]] = 0
+steps, curQueue, nextQueue = 1, [], []
 
-def p2():
-  with open("input") as f:
-    moves, *paths = f.read().splitlines()
-  paths = [re.findall("[A-Z0-9]+", p) for p in paths]
-  locations, nodes = [], {}
-  
-  for path in paths[1:]:
-    nodes[path[0]] = path[1:]
-    if path[0][-1] == "A":
-      locations.append(path[0])
+#Need to do some work to figure out what nextQueue is for start
+if pipes[start[1]][start[0] - 1] in ["F", "L", "-"]:
+    curQueue.append((start[0]-1, start[1]))
+if pipes[start[1]][start[0] + 1] in ["J", "7", "-"]:
+    curQueue.append((start[0]+1, start[1]))
+if pipes[start[1] - 1][start[0]] in ["F", "7", "|"]:
+    curQueue.append((start[0], start[1]-1))
+if pipes[start[1]+1][start[0]] in ["J", "L", "|"]:
+    curQueue.append((start[0], start[1]+1))
 
-  #When you reach a Z, you can calculate the frequency it will appear.
-  #Once you have all 6 frequencies, you can find the least common multiple
-  steps = 0
-  while True:
-    for move in moves:
-      if move == "R":
-        for i, l in enumerate(locations):
-          locations[i] = nodes[l][1]
-      else:
-        for i, l in enumerate(locations):
-          locations[i] = nodes[l][0]
-      steps += 1
-      input(f"Step {steps}: {locations}")
-      if all(l[2] == "Z" for l in locations): 
-        print(steps)
-        return
+while curQueue:
+    x, y = curQueue.pop()
+    stepmap[y][x] = pipes[y][x]
+    nextSteps = findNext(pipes[y][x], x, y)
+    for step in nextSteps:
+        if stepmap[step[1]][step[0]] == ".":
+            nextQueue.append(step)
 
+    if not curQueue:
+        curQueue = nextQueue
+        nextQueue = []
+        steps += 1
 
-#p1()
-p2()
+#This version doesn't take care of "junk pipe bits"
+curQueue = [[0,0]]
+while curQueue:
+    x, y = curQueue.pop()
+    stepmap[y][x] = "O"
+    try:
+        if stepmap[y][x-1] == ".":
+            curQueue.append([x-1, y])
+    except: pass
+    try:
+        if stepmap[y][x+1] == ".":
+            curQueue.append([x+1, y])
+    except:pass
+    try:
+        if stepmap[y+1][x] == ".":
+            curQueue.append([x, y+1])
+    except:pass
+    try:
+        if stepmap[y-1][x] == ".":
+            curQueue.append([x, y-1])
+    except:pass
+
+for line in stepmap:
+    print(" ".join([str(x) for x in line]))
+print(steps-1)
+print(sum(line.count(".") for line in stepmap))
