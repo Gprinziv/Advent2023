@@ -1,4 +1,4 @@
-import re
+import re, math
 
 def p1():
   with open("input") as f:
@@ -26,29 +26,33 @@ def p2():
     moves, *paths = f.read().splitlines()
   paths = [re.findall("[A-Z0-9]+", p) for p in paths]
   locations, nodes = [], {}
-  
+
   for path in paths[1:]:
     nodes[path[0]] = path[1:]
     if path[0][-1] == "A":
       locations.append(path[0])
 
-  #When you reach a Z, you can calculate the frequency it will appear.
-  #Once you have all 6 frequencies, you can find the least common multiple
-  steps = 0
-  while True:
-    for move in moves:
-      if move == "R":
-        for i, l in enumerate(locations):
-          locations[i] = nodes[l][1]
-      else:
-        for i, l in enumerate(locations):
-          locations[i] = nodes[l][0]
-      steps += 1
-      input(f"Step {steps}: {locations}")
-      if all(l[2] == "Z" for l in locations): 
-        print(steps)
-        return
+  #For each starting location, find the Z frequency, then calc LCM.
+  #it's possible z loops to a different than A, so this could be a royal cock up.
+  locSteps = []
+  for l in locations:
+    thisLoc = l
+    steps = 0
+    while thisLoc[2] != "Z":
+      for move in moves:
+        if move == "R":
+          thisLoc = nodes[thisLoc][1]
+        else:
+          thisLoc = nodes[thisLoc][1]
+        steps += 1
+    locSteps.append(steps)
 
+  while len(locSteps) > 1:
+    a = locSteps.pop()
+    b = locSteps.pop()
+    lcm = (a * b) // math.gcd(a, b)
+    locSteps.append(lcm)
+  print(locSteps.pop())
 
 #p1()
 p2()
